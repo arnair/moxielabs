@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_pokedex/common_widgets/error_alert.dart';
+import 'package:flutter_pokedex/common_widgets/dialogs.dart';
 import 'package:flutter_pokedex/features/authentication/presentation/login_controller.dart';
 import 'package:flutter_pokedex/routing/app_router.gr.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,8 +57,12 @@ class _LoadingAnimationState extends ConsumerState<LoadingScreen>
       }
     } catch (e) {
       if (mounted) {
-        bool tryAgain = await errorAlert(
-                context, e.toString().replaceAll('Exception:', '')) ??
+        bool tryAgain = await showErrorDialog(
+              context,
+              title: 'Pokedex not able to open',
+              message: e.toString().replaceAll('Exception:', ''),
+              buttonText: 'Try again',
+            ) ??
             false;
         if (tryAgain) {
           checkUserLoggedIn();

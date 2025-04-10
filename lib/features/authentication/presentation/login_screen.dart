@@ -19,7 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLogin = true;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,26 +30,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
       final controller = ref.read(loginControllerProvider.notifier);
-      final success = await (_isLogin
-          ? controller.login(
-              _usernameController.text,
-              _passwordController.text,
-            )
-          : controller.register(
-              _usernameController.text,
-              _passwordController.text,
-            ));
+      final success = await controller.submit(
+        _usernameController.text,
+        _passwordController.text,
+        _isLogin,
+      );
 
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-
         if (success) {
           context.router.replace(const HomeRoute());
         } else {

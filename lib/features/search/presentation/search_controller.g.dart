@@ -6,7 +6,7 @@ part of 'search_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchControllerHash() => r'8d7931b8544d923efd83358e0d3098df5c9635df';
+String _$searchControllerHash() => r'8285711b661ac84ba036ca2d897ada69d3cc1000';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,10 +29,10 @@ class _SystemHash {
   }
 }
 
-abstract class _$SearchController extends BuildlessNotifier<List<Pokemon>> {
+abstract class _$SearchController extends BuildlessNotifier<SearchState> {
   late final User user;
 
-  List<Pokemon> build(
+  SearchState build(
     User user,
   );
 }
@@ -42,7 +42,7 @@ abstract class _$SearchController extends BuildlessNotifier<List<Pokemon>> {
 const searchControllerProvider = SearchControllerFamily();
 
 /// See also [SearchController].
-class SearchControllerFamily extends Family<List<Pokemon>> {
+class SearchControllerFamily extends Family<SearchState> {
   /// See also [SearchController].
   const SearchControllerFamily();
 
@@ -81,7 +81,7 @@ class SearchControllerFamily extends Family<List<Pokemon>> {
 
 /// See also [SearchController].
 class SearchControllerProvider
-    extends NotifierProviderImpl<SearchController, List<Pokemon>> {
+    extends NotifierProviderImpl<SearchController, SearchState> {
   /// See also [SearchController].
   SearchControllerProvider(
     User user,
@@ -112,7 +112,7 @@ class SearchControllerProvider
   final User user;
 
   @override
-  List<Pokemon> runNotifierBuild(
+  SearchState runNotifierBuild(
     covariant SearchController notifier,
   ) {
     return notifier.build(
@@ -137,7 +137,7 @@ class SearchControllerProvider
   }
 
   @override
-  NotifierProviderElement<SearchController, List<Pokemon>> createElement() {
+  NotifierProviderElement<SearchController, SearchState> createElement() {
     return _SearchControllerProviderElement(this);
   }
 
@@ -157,13 +157,13 @@ class SearchControllerProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchControllerRef on NotifierProviderRef<List<Pokemon>> {
+mixin SearchControllerRef on NotifierProviderRef<SearchState> {
   /// The parameter `user` of this provider.
   User get user;
 }
 
 class _SearchControllerProviderElement
-    extends NotifierProviderElement<SearchController, List<Pokemon>>
+    extends NotifierProviderElement<SearchController, SearchState>
     with SearchControllerRef {
   _SearchControllerProviderElement(super.provider);
 

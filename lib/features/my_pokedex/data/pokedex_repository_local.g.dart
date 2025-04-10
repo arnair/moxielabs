@@ -7,7 +7,7 @@ part of 'pokedex_repository_local.dart';
 // **************************************************************************
 
 String _$pokedexRepositoryLocalHash() =>
-    r'1db6a52b077ae9f2e9f1fecab3930e17b4c4baca';
+    r'b22d9c57b47252c70779a18b86446fd463114028';
 
 /// See also [pokedexRepositoryLocal].
 @ProviderFor(pokedexRepositoryLocal)

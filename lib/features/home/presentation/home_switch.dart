@@ -23,7 +23,7 @@ class HomeSwitch extends StatelessWidget {
       height: containerHeight,
       margin: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Color.fromARGB(77, 255, 255, 255),
         borderRadius: BorderRadius.circular(containerHeight / 2),
       ),
       child: Stack(

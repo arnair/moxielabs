@@ -7,7 +7,6 @@ import 'package:flutter_pokedex/features/search/presentation/search_screen.dart'
 import 'package:flutter_pokedex/features/my_pokedex/presentation/my_pokedex_screen.dart';
 import 'package:flutter_pokedex/features/authentication/presentation/login_controller.dart';
 import 'package:flutter_pokedex/features/home/presentation/home_switch.dart';
-import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
 
 @RoutePage()
 class HomeScreen extends ConsumerStatefulWidget {
@@ -74,10 +73,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     ),
                     onPressed: () async {
+                      final router = context.router;
                       await ref.read(loginControllerProvider.notifier).logout();
-                      if (mounted) {
-                        context.router.replaceNamed('/login');
-                      }
+                      if (!mounted) return;
+                      router.replacePath('/login');
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

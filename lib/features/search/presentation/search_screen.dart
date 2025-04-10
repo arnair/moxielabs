@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pokedex/common_widgets/pokemon_card.dart';
+import 'package:flutter_pokedex/common_widgets/dialogs.dart';
 import 'package:flutter_pokedex/features/search/domain/pokemon_model.dart';
 import 'package:flutter_pokedex/features/search/presentation/search_controller.dart';
 import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
@@ -31,8 +32,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         .watchSurprisePokemonList()
         .listen((pokemons) {
       if (pokemons.isNotEmpty && mounted) {
-        ref.read(searchControllerProvider(widget.user).notifier).state =
-            pokemons;
+        ref
+            .read(searchControllerProvider(widget.user).notifier)
+            .updatePokemonsList(pokemons);
       }
     });
   }
@@ -46,7 +48,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = ref.watch(searchControllerProvider(widget.user));
+    final searchState = ref.watch(searchControllerProvider(widget.user));
+    final controller = ref.read(searchControllerProvider(widget.user).notifier);
 
     return Column(
       children: [
@@ -64,9 +67,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   prefixIcon: const Icon(Icons.search),
                 ),
                 onSubmitted: (value) async {
-                  await ref
-                      .read(searchControllerProvider(widget.user).notifier)
-                      .searchPokemon(value);
+                  if (value.trim().isEmpty) {
+                    await showErrorDialog(
+                      context,
+                      title: 'Empty search',
+                      message: 'Please enter a Pokémon name to search for.',
+                    );
+                    return;
+                  }
+                  await controller.searchPokemon(value);
                 },
               ),
               const SizedBox(height: 16),
@@ -77,46 +86,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Palette.yellow,
                     ),
-                    onPressed: () async {
-                      if (_searchController.text.trim().isEmpty) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Empty search'),
-                            content: const Text(
-                                'Please enter a Pokémon name to search for.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                        return;
-                      }
+                    onPressed: searchState.isLoading
+                        ? null
+                        : () async {
+                            if (_searchController.text.trim().isEmpty) {
+                              await showErrorDialog(
+                                context,
+                                title: 'Empty search',
+                                message:
+                                    'Please enter a Pokémon name to search for.',
+                              );
+                              return;
+                            }
 
-                      final found = await ref
-                          .read(searchControllerProvider(widget.user).notifier)
-                          .searchPokemon(_searchController.text);
+                            final found = await controller
+                                .searchPokemon(_searchController.text);
 
-                      if (!found) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Pokémon Not Found'),
-                            content: Text(
-                                'No Pokémon found with the name "${_searchController.text}".\nPlease check the spelling and try again.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    },
+                            if (!found && context.mounted) {
+                              await showErrorDialog(
+                                context,
+                                title: 'Pokémon Not Found',
+                                message:
+                                    'You try with "${_searchController.text}" but no result try again changin the spelling',
+                              );
+                            }
+                          },
                     child:
                         const Text('Search', style: AppTextStyle.normalBlack),
                   ),
@@ -125,11 +119,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Palette.yellow,
                     ),
-                    onPressed: () async {
-                      await ref
-                          .read(searchControllerProvider(widget.user).notifier)
-                          .getRandomPokemon();
-                    },
+                    onPressed: searchState.isLoading
+                        ? null
+                        : () async {
+                            await controller.getRandomPokemon();
+                          },
                     child: const Text('Surprise Me!',
                         style: AppTextStyle.normalBlack),
                   ),
@@ -139,47 +133,51 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
         Expanded(
-          child: filteredList.isEmpty
+          child: searchState.isLoading
               ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(18.0),
-                    child: Text(
-                      'By default here it will show the local saved pokemons from the latest surprise button',
-                      style: AppTextStyle.normalBlack,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  child: CircularProgressIndicator(),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  itemCount: filteredList.length,
-                  itemBuilder: (context, index) {
-                    Pokemon pokemon = filteredList[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: SearchCard(
-                        pokemon: pokemon,
-                        index: index,
-                        onAddToPokedex: () async {
-                          // First update the search list state to show the Pokémon as captured
-                          ref
-                              .read(searchControllerProvider(widget.user)
-                                  .notifier)
-                              .updatePokemonState(
-                                  pokemon.copyWith(captured: true));
-
-                          // Then add it to the Pokédex
-                          await ref
-                              .read(pokedexControllerProvider(widget.user)
-                                  .notifier)
-                              .addPokemonToPokedex(
-                                  pokemon.copyWith(captured: true));
-                        },
+              : searchState.pokemons.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(18.0),
+                        child: Text(
+                          'By default here it will show the local saved pokemons from the latest surprise button',
+                          style: AppTextStyle.normalBlack,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    );
-                  },
-                ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: searchState.pokemons.length,
+                      itemBuilder: (context, index) {
+                        Pokemon pokemon = searchState.pokemons[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: SearchCard(
+                            pokemon: pokemon,
+                            index: index,
+                            onAddToPokedex: () async {
+                              // First update the search list state to show the Pokémon as captured
+                              ref
+                                  .read(searchControllerProvider(widget.user)
+                                      .notifier)
+                                  .updatePokemonState(
+                                      pokemon.copyWith(captured: true));
+
+                              // Then add it to the Pokédex
+                              await ref
+                                  .read(pokedexControllerProvider(widget.user)
+                                      .notifier)
+                                  .addPokemonToPokedex(
+                                      pokemon.copyWith(captured: true));
+                            },
+                          ),
+                        );
+                      },
+                    ),
         ),
       ],
     );

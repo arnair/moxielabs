@@ -7,7 +7,7 @@ part of 'search_repository_local.dart';
 // **************************************************************************
 
 String _$pokemonsRepositoryLocalHash() =>
-    r'8a566dbd07b65fff815f8053449727a5f16fc9ef';
+    r'9df6b2426538ba17e7748540f323c81de28b6031';
 
 /// See also [pokemonsRepositoryLocal].
 @ProviderFor(pokemonsRepositoryLocal)

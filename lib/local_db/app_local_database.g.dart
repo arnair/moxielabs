@@ -3,7 +3,7 @@
 part of 'app_local_database.dart';
 
 // ignore_for_file: type=lint
-class $UsersTable extends Users with TableInfo<$UsersTable, User> {
+class $UsersTable extends Users with TableInfo<$UsersTable, UserData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -66,7 +66,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   String get actualTableName => $name;
   static const String $name = 'users';
   @override
-  VerificationContext validateIntegrity(Insertable<User> instance,
+  VerificationContext validateIntegrity(Insertable<UserData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -107,9 +107,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+  UserData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return User(
+    return UserData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       username: attachedDatabase.typeMapping
@@ -131,14 +131,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   }
 }
 
-class User extends DataClass implements Insertable<User> {
+class UserData extends DataClass implements Insertable<UserData> {
   final int id;
   final String username;
   final String password;
   final bool isLoggedIn;
   final DateTime? lastLogin;
   final String? sessionToken;
-  const User(
+  const UserData(
       {required this.id,
       required this.username,
       required this.password,
@@ -176,10 +176,10 @@ class User extends DataClass implements Insertable<User> {
     );
   }
 
-  factory User.fromJson(Map<String, dynamic> json,
+  factory UserData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
+    return UserData(
       id: serializer.fromJson<int>(json['id']),
       username: serializer.fromJson<String>(json['username']),
       password: serializer.fromJson<String>(json['password']),
@@ -201,14 +201,14 @@ class User extends DataClass implements Insertable<User> {
     };
   }
 
-  User copyWith(
+  UserData copyWith(
           {int? id,
           String? username,
           String? password,
           bool? isLoggedIn,
           Value<DateTime?> lastLogin = const Value.absent(),
           Value<String?> sessionToken = const Value.absent()}) =>
-      User(
+      UserData(
         id: id ?? this.id,
         username: username ?? this.username,
         password: password ?? this.password,
@@ -217,8 +217,8 @@ class User extends DataClass implements Insertable<User> {
         sessionToken:
             sessionToken.present ? sessionToken.value : this.sessionToken,
       );
-  User copyWithCompanion(UsersCompanion data) {
-    return User(
+  UserData copyWithCompanion(UsersCompanion data) {
+    return UserData(
       id: data.id.present ? data.id.value : this.id,
       username: data.username.present ? data.username.value : this.username,
       password: data.password.present ? data.password.value : this.password,
@@ -233,7 +233,7 @@ class User extends DataClass implements Insertable<User> {
 
   @override
   String toString() {
-    return (StringBuffer('User(')
+    return (StringBuffer('UserData(')
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('password: $password, ')
@@ -250,7 +250,7 @@ class User extends DataClass implements Insertable<User> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is User &&
+      (other is UserData &&
           other.id == this.id &&
           other.username == this.username &&
           other.password == this.password &&
@@ -259,7 +259,7 @@ class User extends DataClass implements Insertable<User> {
           other.sessionToken == this.sessionToken);
 }
 
-class UsersCompanion extends UpdateCompanion<User> {
+class UsersCompanion extends UpdateCompanion<UserData> {
   final Value<int> id;
   final Value<String> username;
   final Value<String> password;
@@ -283,7 +283,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.sessionToken = const Value.absent(),
   })  : username = Value(username),
         password = Value(password);
-  static Insertable<User> custom({
+  static Insertable<UserData> custom({
     Expression<int>? id,
     Expression<String>? username,
     Expression<String>? password,
@@ -928,14 +928,14 @@ class $$UsersTableAnnotationComposer
 class $$UsersTableTableManager extends RootTableManager<
     _$AppDatabase,
     $UsersTable,
-    User,
+    UserData,
     $$UsersTableFilterComposer,
     $$UsersTableOrderingComposer,
     $$UsersTableAnnotationComposer,
     $$UsersTableCreateCompanionBuilder,
     $$UsersTableUpdateCompanionBuilder,
-    (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
-    User,
+    (UserData, BaseReferences<_$AppDatabase, $UsersTable, UserData>),
+    UserData,
     PrefetchHooks Function()> {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
       : super(TableManagerState(
@@ -989,14 +989,14 @@ class $$UsersTableTableManager extends RootTableManager<
 typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $UsersTable,
-    User,
+    UserData,
     $$UsersTableFilterComposer,
     $$UsersTableOrderingComposer,
     $$UsersTableAnnotationComposer,
     $$UsersTableCreateCompanionBuilder,
     $$UsersTableUpdateCompanionBuilder,
-    (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
-    User,
+    (UserData, BaseReferences<_$AppDatabase, $UsersTable, UserData>),
+    UserData,
     PrefetchHooks Function()>;
 typedef $$PokemonTableCreateCompanionBuilder = PokemonCompanion Function({
   Value<int> id,

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_pokedex/features/my_pokedex/data/pokedex_repository_local.dart';
 import 'package:flutter_pokedex/features/search/domain/pokemon_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'pokedex_service.g.dart';
 
@@ -30,7 +31,7 @@ class PokedexService {
 }
 
 @riverpod
-PokedexService pokedexService(PokedexServiceRef ref) {
+PokedexService pokedexService(Ref ref) {
   final repository = ref.watch(pokedexRepositoryLocalProvider);
   return PokedexService(repository);
 }

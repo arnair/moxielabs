@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pokedex/features/authentication/data/auth_repository_local.dart';
 import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
 
@@ -41,7 +42,7 @@ class AuthService {
 }
 
 @riverpod
-AuthService authService(AuthServiceRef ref) {
+AuthService authService(Ref ref) {
   final repository = ref.watch(authRepositoryLocalProvider);
   return AuthService(repository);
 }

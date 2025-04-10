@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_pokedex/local_db/app_local_database.dart' as db;
 import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'auth_repository_local.g.dart';
 
@@ -60,7 +61,7 @@ class AuthRepositoryLocal {
 }
 
 @riverpod
-AuthRepositoryLocal authRepositoryLocal(AuthRepositoryLocalRef ref) {
+AuthRepositoryLocal authRepositoryLocal(Ref ref) {
   final database = ref.watch(db.appDatabaseProvider);
   return AuthRepositoryLocal(database);
 }

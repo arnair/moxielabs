@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pokedex/local_db/app_local_database.dart' as db;
 import 'package:flutter_pokedex/features/search/domain/pokemon_model.dart';
 import 'package:flutter_pokedex/features/search/domain/pokemon_types_enum.dart';
@@ -95,8 +96,7 @@ class PokemonsRepositoryLocal {
 }
 
 @riverpod
-PokemonsRepositoryLocal pokemonsRepositoryLocal(
-    PokemonsRepositoryLocalRef ref) {
+PokemonsRepositoryLocal pokemonsRepositoryLocal(Ref ref) {
   final database = ref.watch(db.appDatabaseProvider);
   return PokemonsRepositoryLocal(database);
 }

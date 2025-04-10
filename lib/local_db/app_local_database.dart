@@ -7,33 +7,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pokedex/features/search/domain/pokemon_types_enum.dart';
+import 'package:flutter_pokedex/local_db/tables/database_tables.dart';
 
 part 'app_local_database.g.dart';
-
-// Database tables
-class Users extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get username => text().withLength(min: 3, max: 50)();
-  TextColumn get password => text().withLength(min: 6, max: 50)();
-  BoolColumn get isLoggedIn => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get lastLogin => dateTime().nullable()();
-  TextColumn get sessionToken => text().nullable()();
-}
-
-class Pokemon extends Table {
-  IntColumn get id => integer()();
-  TextColumn get name => text()();
-  TextColumn get imageUrl => text()();
-  TextColumn get types => text()(); // JSON string of PokemonTypes enum values
-  BoolColumn get captured => boolean().withDefault(const Constant(false))();
-  TextColumn get generation => text()();
-  TextColumn get effectEntries => text()(); // JSON string of List<String>
-  IntColumn get order => integer().nullable()(); // For custom ordering
-  IntColumn get userId => integer().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
 
 @DriftDatabase(tables: [Users, Pokemon])
 class AppDatabase extends _$AppDatabase {
@@ -53,8 +29,8 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  // User methods
-  Future<User?> getUserByUsername(String username) async {
+  // Core database operations for Users table
+  Future<UserData?> getUserByUsername(String username) async {
     final query = select(users)..where((t) => t.username.equals(username));
     return await query.getSingleOrNull();
   }
@@ -87,12 +63,12 @@ class AppDatabase extends _$AppDatabase {
     await update(users).replace(companion);
   }
 
-  Future<User?> getLoggedInUser() async {
+  Future<UserData?> getLoggedInUser() async {
     final query = select(users)..where((t) => t.isLoggedIn.equals(true));
     return await query.getSingleOrNull();
   }
 
-  // Pokemon operations
+  // Core database operations for Pokemon table
   Future<void> replaceSurprisePokemons(
       List<PokemonData> pokemons, int userId) async {
     // Delete existing surprise pokemons for this user
@@ -113,7 +89,7 @@ class AppDatabase extends _$AppDatabase {
         .write(PokemonCompanion(order: Value(order)));
   }
 
-  Future<int> setPokemonCaptured(int id, int userId, bool isCaptured) {
+  Future<void> setPokemonCaptured(int id, int userId, bool isCaptured) {
     return (update(pokemon)
           ..where((tbl) => tbl.id.equals(id) & tbl.userId.equals(userId)))
         .write(PokemonCompanion(captured: Value(isCaptured)));

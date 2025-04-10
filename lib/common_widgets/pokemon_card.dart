@@ -1,8 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/constants/textstyles.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_pokedex/features/search/domain/pokemon_model.dart';
-import 'package:flutter_pokedex/features/search/presentation/search_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pokedex/constants/palette.dart';
 
@@ -131,6 +132,7 @@ class SearchCard extends ConsumerWidget {
                                     }
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
+                                        duration: const Duration(seconds: 1),
                                         content: Text(
                                             '${pokemon.name} removed from your Pokédex!'),
                                         backgroundColor:
@@ -180,7 +182,7 @@ class SearchCard extends ConsumerWidget {
                                 }
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    duration: const Duration(milliseconds: 500),
+                                    duration: const Duration(seconds: 1),
                                     content: Text(
                                         '${pokemon.name} added to your Pokédex!'),
                                     backgroundColor: pokemon.type.first.color,
