@@ -61,9 +61,30 @@ class SearchCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.all(8),
-                          child: pokemon.imageUrl.endsWith('.svg')
-                              ? SvgPicture.network(pokemon.imageUrl)
-                              : Image.network(pokemon.imageUrl),
+                          child: pokemon.imageUrl.isEmpty
+                              ? Icon(
+                                  Icons.catching_pokemon,
+                                  size: 48,
+                                  color: pokemon.type.first.color,
+                                )
+                              : pokemon.imageUrl.endsWith('.svg')
+                                  ? SvgPicture.network(
+                                      pokemon.imageUrl,
+                                      placeholderBuilder: (context) => Icon(
+                                        Icons.catching_pokemon,
+                                        size: 48,
+                                        color: pokemon.type.first.color,
+                                      ),
+                                    )
+                                  : Image.network(
+                                      pokemon.imageUrl,
+                                      errorBuilder:
+                                          (context, error, stackTrace) => Icon(
+                                        Icons.catching_pokemon,
+                                        size: 48,
+                                        color: pokemon.type.first.color,
+                                      ),
+                                    ),
                         ),
                       ],
                     ),

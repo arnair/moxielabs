@@ -42,6 +42,7 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.1
 
+
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -85,13 +86,15 @@ dev_dependencies:
   drift_dev: ^2.26.0
   #Testing
   mockito: ^5.4.5
+  integration_test:
+    sdk: flutter
+  network_image_mock: ^2.1.1
 
 
 flutter:
   uses-material-design: true
   
   assets:
-    - assets/icons/
     - assets/launcher/
     - assets/images/
 

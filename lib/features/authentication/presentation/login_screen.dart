@@ -68,15 +68,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const SizedBox(height: 20),
                 Image.asset(
-                  'assets/launcher/logo.png',
-                  height: 120,
+                  _isLogin
+                      ? 'assets/images/oak.png'
+                      : 'assets/images/oak_2.webp',
+                  height: 200,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Pokédex',
+                  _isLogin ? 'Welcome Back Trainer!' : 'Register New Trainer',
                   style: AppTextStyle.largeWhite.copyWith(
                     fontFamily: 'PokemonGb',
-                    fontSize: 28,
+                    fontSize: 24,
                   ),
                   textAlign: TextAlign.center,
                 ),
