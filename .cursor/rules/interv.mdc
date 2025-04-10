@@ -1,0 +1,45 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+This is a test for a job: this is the indication that i need to do put this in context when i ask you things: 
+
+# Flutter Assignment
+
+Please build a basic Flutter mobile application that meets the requirements, below. The app will only be run in the emulator and it can be compiled to either iOS or Android. Additionally, any data storage can be handled locally in a cache or other simple mechanism.
+
+After submitting the below we will schedule time to discuss in detail the choices you made and what your thought processes were as you architected the application.
+
+---
+
+We are going to create our very own Pokédex to manage all of the Pokemon we collect on our adventures.
+
+We will use the public PokéAPI (https://pokeapi.co/) to gather information about our pokémon.
+
+Your app should have the following features:
+
+- **Login Screen:**
+    - Provide a simple login screen that will allow a user to login to their existing Pokédex account.
+        - For this you can simply store the user information locally in the app.
+- **Search Screen:**
+    - A search field where the user can enter the name of the Pokemon thave just captured and retrieve its details from the [`https://pokeapi.co/api/v2/ability/](https://pokeapi.co/api/v2/ability/){id or name}/` endpoint.
+        - If the name the user enters returns no results, indicate this clearly and ask them to try again.
+        - If the name the user enters does return a result, then display the following details in a card for the returned Pokemon:
+            - An image of the pokémon
+            - `name`
+            - `generation`
+            - `effect_entries`
+    - Provide a “Surprise Me!” button. When the user presses it, pull a random list of 10 Pokémon and display on the screen.
+    - For the returned Pokémon (either through the search or “surprise me” function), provide a button that allows the user to add that Pokémon to their Pokédex.
+    - Search results of the results of a the “surprise me” button should be cached across app sessions.
+- **My Pokédex Screen:**
+    - Provide a separate screen where the user can view their Pokédex and see all of the Pokémon they have saved.
+        - The user should be able to remove any Pokémon from their list that they no longer have.
+        - The user should be able to re-order their saved Pokémon and the app should remember this custom order permanently.
+- **Other App Features:**
+    - Provide the capability to log out
+    - Implement a number of basic unit, widget, or integration tests.

@@ -1,0 +1,108 @@
+name: flutter_pokedex
+description: "Code challenge para Flutter Developers."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  #Riverpod
+  flutter_riverpod: ^2.6.1
+  #Riverpod generator
+  riverpod_annotation: ^2.6.1
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.5
+  #Utilities for math operations
+  intl: ^0.20.2
+  #Routing system - Replacing with auto_route
+  auto_route: ^10.0.1
+  #Read SVG files
+  flutter_svg: ^2.0.17
+  #Dio
+  dio: ^5.8.0+1
+  #Generate native splash screen
+  flutter_native_splash: ^2.4.6
+  #Generate icons
+  flutter_launcher_icons: ^0.14.3
+  #Show more lint problems
+  custom_lint: ^0.7.5
+  #Model generator
+  freezed: ^3.0.6
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  #Local database
+  drift: ^2.26.0
+  sqlite3_flutter_libs: ^0.5.32
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/launcher/logo.png"
+  min_sdk_android: 21 
+  web:
+    generate: true
+    image_path: "assets/launcher/logo.png"
+    background_color: "#FFFFFF"
+    theme_color: "#FFFFFF"
+  windows:
+    generate: true
+    image_path: "assets/launcher/logo.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/launcher/logo.png"
+
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: "assets/launcher/android12splash.png"
+  android: true
+  ios: true
+
+  android_12:
+    image: "assets/launcher/android12splash.png"
+    image_dark: "assets/launcher/android12splash.png"
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  #Lint rules
+  flutter_lints: ^5.0.0
+  #Model generator
+  json_serializable: ^6.9.4
+  #Router generator
+  auto_route_generator: ^10.0.1
+  #Database code generator
+  drift_dev: ^2.26.0
+  #Testing
+  mockito: ^5.4.5
+
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/icons/
+    - assets/launcher/
+    - assets/images/
+
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: fonts/Lato-Regular.ttf
+        - asset: fonts/Lato-Bold.ttf
+          weight: 700
+
+    - family: PokemonGb
+      fonts:
+        - asset: fonts/PokemonGb-RAeo.ttf
+  

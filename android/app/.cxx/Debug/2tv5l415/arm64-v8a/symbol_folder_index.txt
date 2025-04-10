@@ -1,0 +1,1 @@
+/Users/arnau/Desktop/apps/pruebas/flutter_pokedex-dev/build/app/intermediates/cxx/Debug/2tv5l415/obj/arm64-v8a
