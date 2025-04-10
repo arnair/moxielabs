@@ -45,8 +45,21 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_logged_in" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _lastLoginMeta =
+      const VerificationMeta('lastLogin');
   @override
-  List<GeneratedColumn> get $columns => [id, username, password, isLoggedIn];
+  late final GeneratedColumn<DateTime> lastLogin = GeneratedColumn<DateTime>(
+      'last_login', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _sessionTokenMeta =
+      const VerificationMeta('sessionToken');
+  @override
+  late final GeneratedColumn<String> sessionToken = GeneratedColumn<String>(
+      'session_token', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, username, password, isLoggedIn, lastLogin, sessionToken];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -78,6 +91,16 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           isLoggedIn.isAcceptableOrUnknown(
               data['is_logged_in']!, _isLoggedInMeta));
     }
+    if (data.containsKey('last_login')) {
+      context.handle(_lastLoginMeta,
+          lastLogin.isAcceptableOrUnknown(data['last_login']!, _lastLoginMeta));
+    }
+    if (data.containsKey('session_token')) {
+      context.handle(
+          _sessionTokenMeta,
+          sessionToken.isAcceptableOrUnknown(
+              data['session_token']!, _sessionTokenMeta));
+    }
     return context;
   }
 
@@ -95,6 +118,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           .read(DriftSqlType.string, data['${effectivePrefix}password'])!,
       isLoggedIn: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_logged_in'])!,
+      lastLogin: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_login']),
+      sessionToken: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}session_token']),
     );
   }
 
@@ -109,11 +136,15 @@ class User extends DataClass implements Insertable<User> {
   final String username;
   final String password;
   final bool isLoggedIn;
+  final DateTime? lastLogin;
+  final String? sessionToken;
   const User(
       {required this.id,
       required this.username,
       required this.password,
-      required this.isLoggedIn});
+      required this.isLoggedIn,
+      this.lastLogin,
+      this.sessionToken});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -121,6 +152,12 @@ class User extends DataClass implements Insertable<User> {
     map['username'] = Variable<String>(username);
     map['password'] = Variable<String>(password);
     map['is_logged_in'] = Variable<bool>(isLoggedIn);
+    if (!nullToAbsent || lastLogin != null) {
+      map['last_login'] = Variable<DateTime>(lastLogin);
+    }
+    if (!nullToAbsent || sessionToken != null) {
+      map['session_token'] = Variable<String>(sessionToken);
+    }
     return map;
   }
 
@@ -130,6 +167,12 @@ class User extends DataClass implements Insertable<User> {
       username: Value(username),
       password: Value(password),
       isLoggedIn: Value(isLoggedIn),
+      lastLogin: lastLogin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastLogin),
+      sessionToken: sessionToken == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sessionToken),
     );
   }
 
@@ -141,6 +184,8 @@ class User extends DataClass implements Insertable<User> {
       username: serializer.fromJson<String>(json['username']),
       password: serializer.fromJson<String>(json['password']),
       isLoggedIn: serializer.fromJson<bool>(json['isLoggedIn']),
+      lastLogin: serializer.fromJson<DateTime?>(json['lastLogin']),
+      sessionToken: serializer.fromJson<String?>(json['sessionToken']),
     );
   }
   @override
@@ -151,16 +196,26 @@ class User extends DataClass implements Insertable<User> {
       'username': serializer.toJson<String>(username),
       'password': serializer.toJson<String>(password),
       'isLoggedIn': serializer.toJson<bool>(isLoggedIn),
+      'lastLogin': serializer.toJson<DateTime?>(lastLogin),
+      'sessionToken': serializer.toJson<String?>(sessionToken),
     };
   }
 
   User copyWith(
-          {int? id, String? username, String? password, bool? isLoggedIn}) =>
+          {int? id,
+          String? username,
+          String? password,
+          bool? isLoggedIn,
+          Value<DateTime?> lastLogin = const Value.absent(),
+          Value<String?> sessionToken = const Value.absent()}) =>
       User(
         id: id ?? this.id,
         username: username ?? this.username,
         password: password ?? this.password,
         isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+        lastLogin: lastLogin.present ? lastLogin.value : this.lastLogin,
+        sessionToken:
+            sessionToken.present ? sessionToken.value : this.sessionToken,
       );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -169,6 +224,10 @@ class User extends DataClass implements Insertable<User> {
       password: data.password.present ? data.password.value : this.password,
       isLoggedIn:
           data.isLoggedIn.present ? data.isLoggedIn.value : this.isLoggedIn,
+      lastLogin: data.lastLogin.present ? data.lastLogin.value : this.lastLogin,
+      sessionToken: data.sessionToken.present
+          ? data.sessionToken.value
+          : this.sessionToken,
     );
   }
 
@@ -178,13 +237,16 @@ class User extends DataClass implements Insertable<User> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('password: $password, ')
-          ..write('isLoggedIn: $isLoggedIn')
+          ..write('isLoggedIn: $isLoggedIn, ')
+          ..write('lastLogin: $lastLogin, ')
+          ..write('sessionToken: $sessionToken')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, username, password, isLoggedIn);
+  int get hashCode =>
+      Object.hash(id, username, password, isLoggedIn, lastLogin, sessionToken);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -192,7 +254,9 @@ class User extends DataClass implements Insertable<User> {
           other.id == this.id &&
           other.username == this.username &&
           other.password == this.password &&
-          other.isLoggedIn == this.isLoggedIn);
+          other.isLoggedIn == this.isLoggedIn &&
+          other.lastLogin == this.lastLogin &&
+          other.sessionToken == this.sessionToken);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -200,17 +264,23 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> username;
   final Value<String> password;
   final Value<bool> isLoggedIn;
+  final Value<DateTime?> lastLogin;
+  final Value<String?> sessionToken;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.username = const Value.absent(),
     this.password = const Value.absent(),
     this.isLoggedIn = const Value.absent(),
+    this.lastLogin = const Value.absent(),
+    this.sessionToken = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
     required String username,
     required String password,
     this.isLoggedIn = const Value.absent(),
+    this.lastLogin = const Value.absent(),
+    this.sessionToken = const Value.absent(),
   })  : username = Value(username),
         password = Value(password);
   static Insertable<User> custom({
@@ -218,12 +288,16 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? username,
     Expression<String>? password,
     Expression<bool>? isLoggedIn,
+    Expression<DateTime>? lastLogin,
+    Expression<String>? sessionToken,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (username != null) 'username': username,
       if (password != null) 'password': password,
       if (isLoggedIn != null) 'is_logged_in': isLoggedIn,
+      if (lastLogin != null) 'last_login': lastLogin,
+      if (sessionToken != null) 'session_token': sessionToken,
     });
   }
 
@@ -231,12 +305,16 @@ class UsersCompanion extends UpdateCompanion<User> {
       {Value<int>? id,
       Value<String>? username,
       Value<String>? password,
-      Value<bool>? isLoggedIn}) {
+      Value<bool>? isLoggedIn,
+      Value<DateTime?>? lastLogin,
+      Value<String?>? sessionToken}) {
     return UsersCompanion(
       id: id ?? this.id,
       username: username ?? this.username,
       password: password ?? this.password,
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      lastLogin: lastLogin ?? this.lastLogin,
+      sessionToken: sessionToken ?? this.sessionToken,
     );
   }
 
@@ -255,6 +333,12 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (isLoggedIn.present) {
       map['is_logged_in'] = Variable<bool>(isLoggedIn.value);
     }
+    if (lastLogin.present) {
+      map['last_login'] = Variable<DateTime>(lastLogin.value);
+    }
+    if (sessionToken.present) {
+      map['session_token'] = Variable<String>(sessionToken.value);
+    }
     return map;
   }
 
@@ -264,7 +348,9 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('password: $password, ')
-          ..write('isLoggedIn: $isLoggedIn')
+          ..write('isLoggedIn: $isLoggedIn, ')
+          ..write('lastLogin: $lastLogin, ')
+          ..write('sessionToken: $sessionToken')
           ..write(')'))
         .toString();
   }
@@ -323,9 +409,23 @@ class $PokemonTable extends Pokemon with TableInfo<$PokemonTable, PokemonData> {
   late final GeneratedColumn<int> order = GeneratedColumn<int>(
       'order', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, imageUrl, types, captured, generation, effectEntries, order];
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        imageUrl,
+        types,
+        captured,
+        generation,
+        effectEntries,
+        order,
+        userId
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -381,6 +481,10 @@ class $PokemonTable extends Pokemon with TableInfo<$PokemonTable, PokemonData> {
       context.handle(
           _orderMeta, order.isAcceptableOrUnknown(data['order']!, _orderMeta));
     }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
     return context;
   }
 
@@ -406,6 +510,8 @@ class $PokemonTable extends Pokemon with TableInfo<$PokemonTable, PokemonData> {
           .read(DriftSqlType.string, data['${effectivePrefix}effect_entries'])!,
       order: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}order']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}user_id']),
     );
   }
 
@@ -424,6 +530,7 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
   final String generation;
   final String effectEntries;
   final int? order;
+  final int? userId;
   const PokemonData(
       {required this.id,
       required this.name,
@@ -432,7 +539,8 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
       required this.captured,
       required this.generation,
       required this.effectEntries,
-      this.order});
+      this.order,
+      this.userId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -445,6 +553,9 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
     map['effect_entries'] = Variable<String>(effectEntries);
     if (!nullToAbsent || order != null) {
       map['order'] = Variable<int>(order);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<int>(userId);
     }
     return map;
   }
@@ -460,6 +571,8 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
       effectEntries: Value(effectEntries),
       order:
           order == null && nullToAbsent ? const Value.absent() : Value(order),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
     );
   }
 
@@ -475,6 +588,7 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
       generation: serializer.fromJson<String>(json['generation']),
       effectEntries: serializer.fromJson<String>(json['effectEntries']),
       order: serializer.fromJson<int?>(json['order']),
+      userId: serializer.fromJson<int?>(json['userId']),
     );
   }
   @override
@@ -489,6 +603,7 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
       'generation': serializer.toJson<String>(generation),
       'effectEntries': serializer.toJson<String>(effectEntries),
       'order': serializer.toJson<int?>(order),
+      'userId': serializer.toJson<int?>(userId),
     };
   }
 
@@ -500,7 +615,8 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
           bool? captured,
           String? generation,
           String? effectEntries,
-          Value<int?> order = const Value.absent()}) =>
+          Value<int?> order = const Value.absent(),
+          Value<int?> userId = const Value.absent()}) =>
       PokemonData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -510,6 +626,7 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
         generation: generation ?? this.generation,
         effectEntries: effectEntries ?? this.effectEntries,
         order: order.present ? order.value : this.order,
+        userId: userId.present ? userId.value : this.userId,
       );
   PokemonData copyWithCompanion(PokemonCompanion data) {
     return PokemonData(
@@ -524,6 +641,7 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
           ? data.effectEntries.value
           : this.effectEntries,
       order: data.order.present ? data.order.value : this.order,
+      userId: data.userId.present ? data.userId.value : this.userId,
     );
   }
 
@@ -537,14 +655,15 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
           ..write('captured: $captured, ')
           ..write('generation: $generation, ')
           ..write('effectEntries: $effectEntries, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('userId: $userId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, imageUrl, types, captured, generation, effectEntries, order);
+  int get hashCode => Object.hash(id, name, imageUrl, types, captured,
+      generation, effectEntries, order, userId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -556,7 +675,8 @@ class PokemonData extends DataClass implements Insertable<PokemonData> {
           other.captured == this.captured &&
           other.generation == this.generation &&
           other.effectEntries == this.effectEntries &&
-          other.order == this.order);
+          other.order == this.order &&
+          other.userId == this.userId);
 }
 
 class PokemonCompanion extends UpdateCompanion<PokemonData> {
@@ -568,6 +688,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
   final Value<String> generation;
   final Value<String> effectEntries;
   final Value<int?> order;
+  final Value<int?> userId;
   const PokemonCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -577,6 +698,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
     this.generation = const Value.absent(),
     this.effectEntries = const Value.absent(),
     this.order = const Value.absent(),
+    this.userId = const Value.absent(),
   });
   PokemonCompanion.insert({
     this.id = const Value.absent(),
@@ -587,6 +709,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
     required String generation,
     required String effectEntries,
     this.order = const Value.absent(),
+    this.userId = const Value.absent(),
   })  : name = Value(name),
         imageUrl = Value(imageUrl),
         types = Value(types),
@@ -601,6 +724,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
     Expression<String>? generation,
     Expression<String>? effectEntries,
     Expression<int>? order,
+    Expression<int>? userId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -611,6 +735,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
       if (generation != null) 'generation': generation,
       if (effectEntries != null) 'effect_entries': effectEntries,
       if (order != null) 'order': order,
+      if (userId != null) 'user_id': userId,
     });
   }
 
@@ -622,7 +747,8 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
       Value<bool>? captured,
       Value<String>? generation,
       Value<String>? effectEntries,
-      Value<int?>? order}) {
+      Value<int?>? order,
+      Value<int?>? userId}) {
     return PokemonCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -632,6 +758,7 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
       generation: generation ?? this.generation,
       effectEntries: effectEntries ?? this.effectEntries,
       order: order ?? this.order,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -662,6 +789,9 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
     if (order.present) {
       map['order'] = Variable<int>(order.value);
     }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
     return map;
   }
 
@@ -675,263 +805,8 @@ class PokemonCompanion extends UpdateCompanion<PokemonData> {
           ..write('captured: $captured, ')
           ..write('generation: $generation, ')
           ..write('effectEntries: $effectEntries, ')
-          ..write('order: $order')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $SearchCacheTable extends SearchCache
-    with TableInfo<$SearchCacheTable, SearchCacheData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $SearchCacheTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _queryMeta = const VerificationMeta('query');
-  @override
-  late final GeneratedColumn<String> query = GeneratedColumn<String>(
-      'query', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _resultMeta = const VerificationMeta('result');
-  @override
-  late final GeneratedColumn<String> result = GeneratedColumn<String>(
-      'result', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
-  @override
-  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, query, result, timestamp];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'search_cache';
-  @override
-  VerificationContext validateIntegrity(Insertable<SearchCacheData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('query')) {
-      context.handle(
-          _queryMeta, query.isAcceptableOrUnknown(data['query']!, _queryMeta));
-    } else if (isInserting) {
-      context.missing(_queryMeta);
-    }
-    if (data.containsKey('result')) {
-      context.handle(_resultMeta,
-          result.isAcceptableOrUnknown(data['result']!, _resultMeta));
-    } else if (isInserting) {
-      context.missing(_resultMeta);
-    }
-    if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  SearchCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SearchCacheData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      query: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}query'])!,
-      result: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}result'])!,
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
-    );
-  }
-
-  @override
-  $SearchCacheTable createAlias(String alias) {
-    return $SearchCacheTable(attachedDatabase, alias);
-  }
-}
-
-class SearchCacheData extends DataClass implements Insertable<SearchCacheData> {
-  final int id;
-  final String query;
-  final String result;
-  final DateTime timestamp;
-  const SearchCacheData(
-      {required this.id,
-      required this.query,
-      required this.result,
-      required this.timestamp});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['query'] = Variable<String>(query);
-    map['result'] = Variable<String>(result);
-    map['timestamp'] = Variable<DateTime>(timestamp);
-    return map;
-  }
-
-  SearchCacheCompanion toCompanion(bool nullToAbsent) {
-    return SearchCacheCompanion(
-      id: Value(id),
-      query: Value(query),
-      result: Value(result),
-      timestamp: Value(timestamp),
-    );
-  }
-
-  factory SearchCacheData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SearchCacheData(
-      id: serializer.fromJson<int>(json['id']),
-      query: serializer.fromJson<String>(json['query']),
-      result: serializer.fromJson<String>(json['result']),
-      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'query': serializer.toJson<String>(query),
-      'result': serializer.toJson<String>(result),
-      'timestamp': serializer.toJson<DateTime>(timestamp),
-    };
-  }
-
-  SearchCacheData copyWith(
-          {int? id, String? query, String? result, DateTime? timestamp}) =>
-      SearchCacheData(
-        id: id ?? this.id,
-        query: query ?? this.query,
-        result: result ?? this.result,
-        timestamp: timestamp ?? this.timestamp,
-      );
-  SearchCacheData copyWithCompanion(SearchCacheCompanion data) {
-    return SearchCacheData(
-      id: data.id.present ? data.id.value : this.id,
-      query: data.query.present ? data.query.value : this.query,
-      result: data.result.present ? data.result.value : this.result,
-      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SearchCacheData(')
-          ..write('id: $id, ')
-          ..write('query: $query, ')
-          ..write('result: $result, ')
-          ..write('timestamp: $timestamp')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, query, result, timestamp);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SearchCacheData &&
-          other.id == this.id &&
-          other.query == this.query &&
-          other.result == this.result &&
-          other.timestamp == this.timestamp);
-}
-
-class SearchCacheCompanion extends UpdateCompanion<SearchCacheData> {
-  final Value<int> id;
-  final Value<String> query;
-  final Value<String> result;
-  final Value<DateTime> timestamp;
-  const SearchCacheCompanion({
-    this.id = const Value.absent(),
-    this.query = const Value.absent(),
-    this.result = const Value.absent(),
-    this.timestamp = const Value.absent(),
-  });
-  SearchCacheCompanion.insert({
-    this.id = const Value.absent(),
-    required String query,
-    required String result,
-    required DateTime timestamp,
-  })  : query = Value(query),
-        result = Value(result),
-        timestamp = Value(timestamp);
-  static Insertable<SearchCacheData> custom({
-    Expression<int>? id,
-    Expression<String>? query,
-    Expression<String>? result,
-    Expression<DateTime>? timestamp,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (query != null) 'query': query,
-      if (result != null) 'result': result,
-      if (timestamp != null) 'timestamp': timestamp,
-    });
-  }
-
-  SearchCacheCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? query,
-      Value<String>? result,
-      Value<DateTime>? timestamp}) {
-    return SearchCacheCompanion(
-      id: id ?? this.id,
-      query: query ?? this.query,
-      result: result ?? this.result,
-      timestamp: timestamp ?? this.timestamp,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (query.present) {
-      map['query'] = Variable<String>(query.value);
-    }
-    if (result.present) {
-      map['result'] = Variable<String>(result.value);
-    }
-    if (timestamp.present) {
-      map['timestamp'] = Variable<DateTime>(timestamp.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SearchCacheCompanion(')
-          ..write('id: $id, ')
-          ..write('query: $query, ')
-          ..write('result: $result, ')
-          ..write('timestamp: $timestamp')
+          ..write('order: $order, ')
+          ..write('userId: $userId')
           ..write(')'))
         .toString();
   }
@@ -942,13 +817,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UsersTable users = $UsersTable(this);
   late final $PokemonTable pokemon = $PokemonTable(this);
-  late final $SearchCacheTable searchCache = $SearchCacheTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, pokemon, searchCache];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [users, pokemon];
 }
 
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
@@ -956,12 +829,16 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required String username,
   required String password,
   Value<bool> isLoggedIn,
+  Value<DateTime?> lastLogin,
+  Value<String?> sessionToken,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
   Value<String> username,
   Value<String> password,
   Value<bool> isLoggedIn,
+  Value<DateTime?> lastLogin,
+  Value<String?> sessionToken,
 });
 
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
@@ -983,6 +860,12 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<bool> get isLoggedIn => $composableBuilder(
       column: $table.isLoggedIn, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastLogin => $composableBuilder(
+      column: $table.lastLogin, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sessionToken => $composableBuilder(
+      column: $table.sessionToken, builder: (column) => ColumnFilters(column));
 }
 
 class $$UsersTableOrderingComposer
@@ -1005,6 +888,13 @@ class $$UsersTableOrderingComposer
 
   ColumnOrderings<bool> get isLoggedIn => $composableBuilder(
       column: $table.isLoggedIn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastLogin => $composableBuilder(
+      column: $table.lastLogin, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sessionToken => $composableBuilder(
+      column: $table.sessionToken,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$UsersTableAnnotationComposer
@@ -1027,6 +917,12 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<bool> get isLoggedIn => $composableBuilder(
       column: $table.isLoggedIn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastLogin =>
+      $composableBuilder(column: $table.lastLogin, builder: (column) => column);
+
+  GeneratedColumn<String> get sessionToken => $composableBuilder(
+      column: $table.sessionToken, builder: (column) => column);
 }
 
 class $$UsersTableTableManager extends RootTableManager<
@@ -1056,24 +952,32 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<String> username = const Value.absent(),
             Value<String> password = const Value.absent(),
             Value<bool> isLoggedIn = const Value.absent(),
+            Value<DateTime?> lastLogin = const Value.absent(),
+            Value<String?> sessionToken = const Value.absent(),
           }) =>
               UsersCompanion(
             id: id,
             username: username,
             password: password,
             isLoggedIn: isLoggedIn,
+            lastLogin: lastLogin,
+            sessionToken: sessionToken,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String username,
             required String password,
             Value<bool> isLoggedIn = const Value.absent(),
+            Value<DateTime?> lastLogin = const Value.absent(),
+            Value<String?> sessionToken = const Value.absent(),
           }) =>
               UsersCompanion.insert(
             id: id,
             username: username,
             password: password,
             isLoggedIn: isLoggedIn,
+            lastLogin: lastLogin,
+            sessionToken: sessionToken,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1103,6 +1007,7 @@ typedef $$PokemonTableCreateCompanionBuilder = PokemonCompanion Function({
   required String generation,
   required String effectEntries,
   Value<int?> order,
+  Value<int?> userId,
 });
 typedef $$PokemonTableUpdateCompanionBuilder = PokemonCompanion Function({
   Value<int> id,
@@ -1113,6 +1018,7 @@ typedef $$PokemonTableUpdateCompanionBuilder = PokemonCompanion Function({
   Value<String> generation,
   Value<String> effectEntries,
   Value<int?> order,
+  Value<int?> userId,
 });
 
 class $$PokemonTableFilterComposer
@@ -1147,6 +1053,9 @@ class $$PokemonTableFilterComposer
 
   ColumnFilters<int> get order => $composableBuilder(
       column: $table.order, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
 }
 
 class $$PokemonTableOrderingComposer
@@ -1182,6 +1091,9 @@ class $$PokemonTableOrderingComposer
 
   ColumnOrderings<int> get order => $composableBuilder(
       column: $table.order, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
 }
 
 class $$PokemonTableAnnotationComposer
@@ -1216,6 +1128,9 @@ class $$PokemonTableAnnotationComposer
 
   GeneratedColumn<int> get order =>
       $composableBuilder(column: $table.order, builder: (column) => column);
+
+  GeneratedColumn<int> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
 }
 
 class $$PokemonTableTableManager extends RootTableManager<
@@ -1249,6 +1164,7 @@ class $$PokemonTableTableManager extends RootTableManager<
             Value<String> generation = const Value.absent(),
             Value<String> effectEntries = const Value.absent(),
             Value<int?> order = const Value.absent(),
+            Value<int?> userId = const Value.absent(),
           }) =>
               PokemonCompanion(
             id: id,
@@ -1259,6 +1175,7 @@ class $$PokemonTableTableManager extends RootTableManager<
             generation: generation,
             effectEntries: effectEntries,
             order: order,
+            userId: userId,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1269,6 +1186,7 @@ class $$PokemonTableTableManager extends RootTableManager<
             required String generation,
             required String effectEntries,
             Value<int?> order = const Value.absent(),
+            Value<int?> userId = const Value.absent(),
           }) =>
               PokemonCompanion.insert(
             id: id,
@@ -1279,6 +1197,7 @@ class $$PokemonTableTableManager extends RootTableManager<
             generation: generation,
             effectEntries: effectEntries,
             order: order,
+            userId: userId,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1299,158 +1218,6 @@ typedef $$PokemonTableProcessedTableManager = ProcessedTableManager<
     (PokemonData, BaseReferences<_$AppDatabase, $PokemonTable, PokemonData>),
     PokemonData,
     PrefetchHooks Function()>;
-typedef $$SearchCacheTableCreateCompanionBuilder = SearchCacheCompanion
-    Function({
-  Value<int> id,
-  required String query,
-  required String result,
-  required DateTime timestamp,
-});
-typedef $$SearchCacheTableUpdateCompanionBuilder = SearchCacheCompanion
-    Function({
-  Value<int> id,
-  Value<String> query,
-  Value<String> result,
-  Value<DateTime> timestamp,
-});
-
-class $$SearchCacheTableFilterComposer
-    extends Composer<_$AppDatabase, $SearchCacheTable> {
-  $$SearchCacheTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get query => $composableBuilder(
-      column: $table.query, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get result => $composableBuilder(
-      column: $table.result, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnFilters(column));
-}
-
-class $$SearchCacheTableOrderingComposer
-    extends Composer<_$AppDatabase, $SearchCacheTable> {
-  $$SearchCacheTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get query => $composableBuilder(
-      column: $table.query, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get result => $composableBuilder(
-      column: $table.result, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
-}
-
-class $$SearchCacheTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SearchCacheTable> {
-  $$SearchCacheTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get query =>
-      $composableBuilder(column: $table.query, builder: (column) => column);
-
-  GeneratedColumn<String> get result =>
-      $composableBuilder(column: $table.result, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get timestamp =>
-      $composableBuilder(column: $table.timestamp, builder: (column) => column);
-}
-
-class $$SearchCacheTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $SearchCacheTable,
-    SearchCacheData,
-    $$SearchCacheTableFilterComposer,
-    $$SearchCacheTableOrderingComposer,
-    $$SearchCacheTableAnnotationComposer,
-    $$SearchCacheTableCreateCompanionBuilder,
-    $$SearchCacheTableUpdateCompanionBuilder,
-    (
-      SearchCacheData,
-      BaseReferences<_$AppDatabase, $SearchCacheTable, SearchCacheData>
-    ),
-    SearchCacheData,
-    PrefetchHooks Function()> {
-  $$SearchCacheTableTableManager(_$AppDatabase db, $SearchCacheTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$SearchCacheTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$SearchCacheTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$SearchCacheTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> query = const Value.absent(),
-            Value<String> result = const Value.absent(),
-            Value<DateTime> timestamp = const Value.absent(),
-          }) =>
-              SearchCacheCompanion(
-            id: id,
-            query: query,
-            result: result,
-            timestamp: timestamp,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String query,
-            required String result,
-            required DateTime timestamp,
-          }) =>
-              SearchCacheCompanion.insert(
-            id: id,
-            query: query,
-            result: result,
-            timestamp: timestamp,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ));
-}
-
-typedef $$SearchCacheTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $SearchCacheTable,
-    SearchCacheData,
-    $$SearchCacheTableFilterComposer,
-    $$SearchCacheTableOrderingComposer,
-    $$SearchCacheTableAnnotationComposer,
-    $$SearchCacheTableCreateCompanionBuilder,
-    $$SearchCacheTableUpdateCompanionBuilder,
-    (
-      SearchCacheData,
-      BaseReferences<_$AppDatabase, $SearchCacheTable, SearchCacheData>
-    ),
-    SearchCacheData,
-    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1459,6 +1226,4 @@ class $AppDatabaseManager {
       $$UsersTableTableManager(_db, _db.users);
   $$PokemonTableTableManager get pokemon =>
       $$PokemonTableTableManager(_db, _db.pokemon);
-  $$SearchCacheTableTableManager get searchCache =>
-      $$SearchCacheTableTableManager(_db, _db.searchCache);
 }

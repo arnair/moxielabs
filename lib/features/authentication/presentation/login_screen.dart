@@ -51,7 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         });
 
         if (success) {
-          context.router.replace(const SearchRoute());
+          context.router.replace(const HomeRoute());
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
