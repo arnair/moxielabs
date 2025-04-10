@@ -7,6 +7,7 @@ import 'package:flutter_pokedex/features/search/presentation/search_screen.dart'
 import 'package:flutter_pokedex/features/my_pokedex/presentation/my_pokedex_screen.dart';
 import 'package:flutter_pokedex/features/authentication/presentation/login_controller.dart';
 import 'package:flutter_pokedex/features/home/presentation/home_switch.dart';
+import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
 
 @RoutePage()
 class HomeScreen extends ConsumerStatefulWidget {
@@ -21,23 +22,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final double containerWidth = 360.0;
   final double containerHeight = 40.0;
 
-  final List<Widget> _screens = [
-    const SearchScreen(),
-    const MyPokedexScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(loginControllerProvider.notifier).getCurrentUser();
+    _screens = [
+      MyPokedexScreen(user: user),
+      SearchScreen(user: user),
+    ];
+  }
+
+  void togglePokedex() {
+    setState(() {
+      showPokedex = !showPokedex;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = ref.watch(currentUserProvider);
-    final loginController = ref.read(loginControllerProvider.notifier);
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         titleSpacing: 0,
         toolbarHeight: 100,
-        backgroundColor: const Color(0xFFB71C1C),
+        backgroundColor: Palette.primary,
         title: Column(
           children: [
             Stack(
@@ -45,7 +56,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Center(
                   child: Text(
-                    currentUser?.username ?? 'Trainer',
+                    ref
+                        .read(loginControllerProvider.notifier)
+                        .getCurrentUser()
+                        .username,
                     style: AppTextStyle.normalWhite.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -60,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     ),
                     onPressed: () async {
-                      await loginController.logout();
+                      await ref.read(loginControllerProvider.notifier).logout();
                       if (mounted) {
                         context.router.replaceNamed('/login');
                       }
@@ -88,7 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             HomeSwitch(
               showPokedex: showPokedex,
-              togglePokedex: () => setState(() => showPokedex = !showPokedex),
+              togglePokedex: togglePokedex,
+              containerWidth: containerWidth,
+              containerHeight: containerHeight,
             ),
           ],
         ),

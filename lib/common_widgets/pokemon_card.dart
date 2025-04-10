@@ -9,13 +9,15 @@ import 'package:flutter_pokedex/constants/palette.dart';
 class SearchCard extends ConsumerWidget {
   final Pokemon pokemon;
   final bool showCaptured;
-  final int index;
+  final int? index;
+  final VoidCallback? onAddToPokedex;
 
   const SearchCard({
     super.key,
     required this.pokemon,
     this.showCaptured = false,
-    required this.index,
+    this.index,
+    this.onAddToPokedex,
   });
 
   @override
@@ -124,9 +126,9 @@ class SearchCard extends ConsumerWidget {
                                         horizontal: 2),
                                   ),
                                   onPressed: () {
-                                    ref
-                                        .read(searchControllerProvider.notifier)
-                                        .removeFromPokedex(pokemon);
+                                    if (onAddToPokedex != null) {
+                                      onAddToPokedex!();
+                                    }
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
@@ -173,11 +175,12 @@ class SearchCard extends ConsumerWidget {
                                     const EdgeInsets.symmetric(horizontal: 2),
                               ),
                               onPressed: () {
-                                ref
-                                    .read(searchControllerProvider.notifier)
-                                    .addToPokedex(pokemon);
+                                if (onAddToPokedex != null) {
+                                  onAddToPokedex!();
+                                }
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
+                                    duration: const Duration(milliseconds: 500),
                                     content: Text(
                                         '${pokemon.name} added to your Pokédex!'),
                                     backgroundColor: pokemon.type.first.color,
@@ -197,10 +200,10 @@ class SearchCard extends ConsumerWidget {
                               ),
                             ),
                     ),
-                    if (showCaptured) ...[
+                    if (showCaptured && index != null) ...[
                       const SizedBox(height: 8),
                       ReorderableDragStartListener(
-                        index: index,
+                        index: index!,
                         child: Icon(
                           Icons.open_with,
                           color: pokemon.type.first.color,

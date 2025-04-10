@@ -1,17 +1,22 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/pokemon_model.dart';
 import '../application/search_service.dart';
+import '../data/search_repository_local.dart';
+import 'package:flutter_pokedex/features/authentication/domain/user_model.dart';
 
 part 'search_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SearchController extends _$SearchController {
   late final SearchService _service;
-  final List<Pokemon> _capturedPokemon = [];
+  late final PokemonsRepositoryLocal _localRepository;
+  late final User _currentUser;
 
   @override
-  List<Pokemon> build() {
+  List<Pokemon> build(User user) {
     _service = ref.watch(searchServiceProvider);
+    _localRepository = ref.watch(pokemonsRepositoryLocalProvider);
+    _currentUser = user;
     return [];
   }
 
@@ -28,67 +33,37 @@ class SearchController extends _$SearchController {
     try {
       final randomPokemon = await _service.getRandomPokemons();
       state = randomPokemon;
+      // Save the random pokemon list for the current user
+      await _localRepository.saveSurprisePokemonList(
+          randomPokemon, _currentUser.id);
     } catch (e) {
       state = [];
     }
   }
 
-  void addToPokedex(Pokemon pokemon) {
-    final updatedPokemon = pokemon.copyWith(captured: true);
-    final currentList = [...state];
-    final index = currentList.indexWhere((p) => p.id == pokemon.id);
-
-    if (index != -1) {
-      currentList[index] = updatedPokemon;
-      state = currentList;
-    }
-    if (!_capturedPokemon.any((p) => p.id == pokemon.id)) {
-      _capturedPokemon.add(updatedPokemon);
-    }
+  void updatePokemonState(Pokemon updatedPokemon) {
+    // Create a new list with the updated Pokémon
+    state = [
+      for (final pokemon in state)
+        pokemon.id == updatedPokemon.id ? updatedPokemon : pokemon
+    ];
   }
 
-  void removeFromPokedex(Pokemon pokemon) {
-    final updatedPokemon = pokemon.copyWith(captured: false);
-    final currentList = [...state];
-    final index = currentList.indexWhere((p) => p.id == pokemon.id);
-
-    if (index != -1) {
-      currentList[index] = updatedPokemon;
-      state = currentList;
-    }
-    _capturedPokemon.removeWhere((p) => p.id == pokemon.id);
-  }
-
-  void reorderPokemon(List<Pokemon> newOrder) {
-    _capturedPokemon.clear();
-    _capturedPokemon.addAll(newOrder);
-    state = [...state]; // Trigger rebuild
-  }
-
-  List<Pokemon> getCapturedPokemon() {
-    return _capturedPokemon;
+  Stream<List<Pokemon>> watchSurprisePokemonList() {
+    return _localRepository.watchSurprisePokemonList(_currentUser.id);
   }
 }
 
 List<Pokemon> filterPokemonList({
   required List<Pokemon> pokemonList,
   required String searchText,
-  required bool showCaptured,
-  required SearchController controller,
 }) {
-  if (!showCaptured && searchText.isEmpty) {
+  if (searchText.isEmpty) {
     return pokemonList;
   }
 
-  if (!showCaptured) {
-    if (searchText.isNotEmpty) {
-      return pokemonList
-          .where((pokemon) =>
-              pokemon.name.toLowerCase().startsWith(searchText.toLowerCase()))
-          .toList();
-    }
-    return pokemonList;
-  } else {
-    return controller.getCapturedPokemon();
-  }
+  return pokemonList
+      .where((pokemon) =>
+          pokemon.name.toLowerCase().startsWith(searchText.toLowerCase()))
+      .toList();
 }

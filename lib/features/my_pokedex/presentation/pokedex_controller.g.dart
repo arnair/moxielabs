@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'search_controller.dart';
+part of 'pokedex_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchControllerHash() => r'a93b2f782d84209c82ae1eb9d9472989117b9f05';
+String _$pokedexControllerHash() => r'35b7d1df5a1086401f1c59110b2329c7a65e7c07';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,7 +29,8 @@ class _SystemHash {
   }
 }
 
-abstract class _$SearchController extends BuildlessNotifier<List<Pokemon>> {
+abstract class _$PokedexController
+    extends BuildlessAutoDisposeNotifier<List<Pokemon>> {
   late final User user;
 
   List<Pokemon> build(
@@ -37,27 +38,27 @@ abstract class _$SearchController extends BuildlessNotifier<List<Pokemon>> {
   );
 }
 
-/// See also [SearchController].
-@ProviderFor(SearchController)
-const searchControllerProvider = SearchControllerFamily();
+/// See also [PokedexController].
+@ProviderFor(PokedexController)
+const pokedexControllerProvider = PokedexControllerFamily();
 
-/// See also [SearchController].
-class SearchControllerFamily extends Family<List<Pokemon>> {
-  /// See also [SearchController].
-  const SearchControllerFamily();
+/// See also [PokedexController].
+class PokedexControllerFamily extends Family<List<Pokemon>> {
+  /// See also [PokedexController].
+  const PokedexControllerFamily();
 
-  /// See also [SearchController].
-  SearchControllerProvider call(
+  /// See also [PokedexController].
+  PokedexControllerProvider call(
     User user,
   ) {
-    return SearchControllerProvider(
+    return PokedexControllerProvider(
       user,
     );
   }
 
   @override
-  SearchControllerProvider getProviderOverride(
-    covariant SearchControllerProvider provider,
+  PokedexControllerProvider getProviderOverride(
+    covariant PokedexControllerProvider provider,
   ) {
     return call(
       provider.user,
@@ -76,30 +77,30 @@ class SearchControllerFamily extends Family<List<Pokemon>> {
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'searchControllerProvider';
+  String? get name => r'pokedexControllerProvider';
 }
 
-/// See also [SearchController].
-class SearchControllerProvider
-    extends NotifierProviderImpl<SearchController, List<Pokemon>> {
-  /// See also [SearchController].
-  SearchControllerProvider(
+/// See also [PokedexController].
+class PokedexControllerProvider
+    extends AutoDisposeNotifierProviderImpl<PokedexController, List<Pokemon>> {
+  /// See also [PokedexController].
+  PokedexControllerProvider(
     User user,
   ) : this._internal(
-          () => SearchController()..user = user,
-          from: searchControllerProvider,
-          name: r'searchControllerProvider',
+          () => PokedexController()..user = user,
+          from: pokedexControllerProvider,
+          name: r'pokedexControllerProvider',
           debugGetCreateSourceHash:
               const bool.fromEnvironment('dart.vm.product')
                   ? null
-                  : _$searchControllerHash,
-          dependencies: SearchControllerFamily._dependencies,
+                  : _$pokedexControllerHash,
+          dependencies: PokedexControllerFamily._dependencies,
           allTransitiveDependencies:
-              SearchControllerFamily._allTransitiveDependencies,
+              PokedexControllerFamily._allTransitiveDependencies,
           user: user,
         );
 
-  SearchControllerProvider._internal(
+  PokedexControllerProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
@@ -113,7 +114,7 @@ class SearchControllerProvider
 
   @override
   List<Pokemon> runNotifierBuild(
-    covariant SearchController notifier,
+    covariant PokedexController notifier,
   ) {
     return notifier.build(
       user,
@@ -121,10 +122,10 @@ class SearchControllerProvider
   }
 
   @override
-  Override overrideWith(SearchController Function() create) {
+  Override overrideWith(PokedexController Function() create) {
     return ProviderOverride(
       origin: this,
-      override: SearchControllerProvider._internal(
+      override: PokedexControllerProvider._internal(
         () => create()..user = user,
         from: from,
         name: null,
@@ -137,13 +138,14 @@ class SearchControllerProvider
   }
 
   @override
-  NotifierProviderElement<SearchController, List<Pokemon>> createElement() {
-    return _SearchControllerProviderElement(this);
+  AutoDisposeNotifierProviderElement<PokedexController, List<Pokemon>>
+      createElement() {
+    return _PokedexControllerProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SearchControllerProvider && other.user == user;
+    return other is PokedexControllerProvider && other.user == user;
   }
 
   @override
@@ -157,18 +159,18 @@ class SearchControllerProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchControllerRef on NotifierProviderRef<List<Pokemon>> {
+mixin PokedexControllerRef on AutoDisposeNotifierProviderRef<List<Pokemon>> {
   /// The parameter `user` of this provider.
   User get user;
 }
 
-class _SearchControllerProviderElement
-    extends NotifierProviderElement<SearchController, List<Pokemon>>
-    with SearchControllerRef {
-  _SearchControllerProviderElement(super.provider);
+class _PokedexControllerProviderElement
+    extends AutoDisposeNotifierProviderElement<PokedexController, List<Pokemon>>
+    with PokedexControllerRef {
+  _PokedexControllerProviderElement(super.provider);
 
   @override
-  User get user => (origin as SearchControllerProvider).user;
+  User get user => (origin as PokedexControllerProvider).user;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
