@@ -78,16 +78,35 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       backgroundColor: Palette.yellow,
                     ),
                     onPressed: () async {
-                      await ref
-                          .read(searchControllerProvider(widget.user).notifier)
-                          .searchPokemon(_searchController.text);
-                      if (filteredList.isEmpty) {
+                      if (_searchController.text.trim().isEmpty) {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('No Results Found'),
+                            title: const Text('Empty search'),
+                            content: const Text(
+                                'Please enter a Pokémon name to search for.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                        return;
+                      }
+
+                      final found = await ref
+                          .read(searchControllerProvider(widget.user).notifier)
+                          .searchPokemon(_searchController.text);
+
+                      if (!found) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Pokémon Not Found'),
                             content: Text(
-                                'No Pokémon found with "${_searchController.text}". Please try again with a different spelling.'),
+                                'No Pokémon found with the name "${_searchController.text}".\nPlease check the spelling and try again.'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),

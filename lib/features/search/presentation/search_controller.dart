@@ -20,12 +20,17 @@ class SearchController extends _$SearchController {
     return [];
   }
 
-  Future<void> searchPokemon(String name) async {
+  Future<bool> searchPokemon(String name) async {
     try {
       final pokemon = await _service.searchPokemonByName(name);
-      state = pokemon != null ? [pokemon] : [];
+      if (pokemon != null) {
+        state = [pokemon];
+        return true;
+      }
+      return false;
     } catch (e) {
-      state = [];
+      // Don't update state on error, keep current list
+      return false;
     }
   }
 
