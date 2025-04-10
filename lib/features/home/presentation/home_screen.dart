@@ -6,6 +6,7 @@ import 'package:flutter_pokedex/constants/palette.dart';
 import 'package:flutter_pokedex/features/search/presentation/search_screen.dart';
 import 'package:flutter_pokedex/features/my_pokedex/presentation/my_pokedex_screen.dart';
 import 'package:flutter_pokedex/features/authentication/presentation/login_controller.dart';
+import 'package:flutter_pokedex/features/home/presentation/home_switch.dart';
 
 @RoutePage()
 class HomeScreen extends ConsumerStatefulWidget {
@@ -85,95 +86,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 10,
-              ),
-              child: SizedBox(
-                height: containerHeight,
-                width: containerWidth,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.5),
-                        border: Border.all(),
-                        borderRadius:
-                            BorderRadius.circular(containerHeight / 2),
-                      ),
-                    ),
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      left: !showPokedex ? 0 : (containerWidth / 2),
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 1),
-                        decoration: BoxDecoration(
-                          color: Palette.yellow,
-                          borderRadius:
-                              BorderRadius.circular(containerHeight / 2),
-                        ),
-                        height: containerHeight - 2,
-                        width: containerWidth / 2,
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => showPokedex = false),
-                            child: Container(
-                              height: containerHeight,
-                              decoration: const BoxDecoration(
-                                color: Colors.transparent,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Search',
-                                  style: !showPokedex
-                                      ? AppTextStyle.titleBlack
-                                      : AppTextStyle.titleWhite,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => showPokedex = true),
-                            child: Container(
-                              height: containerHeight,
-                              decoration: const BoxDecoration(
-                                color: Colors.transparent,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'My Pokédex',
-                                  style: showPokedex
-                                      ? AppTextStyle.titleBlack
-                                      : AppTextStyle.titleWhite,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () => setState(() => showPokedex = !showPokedex),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius:
-                              BorderRadius.circular(containerHeight / 2),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            HomeSwitch(
+              showPokedex: showPokedex,
+              togglePokedex: () => setState(() => showPokedex = !showPokedex),
             ),
           ],
         ),

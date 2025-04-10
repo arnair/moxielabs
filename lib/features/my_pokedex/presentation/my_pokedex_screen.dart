@@ -24,16 +24,6 @@ class _MyPokedexScreenState extends ConsumerState<MyPokedexScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'My Pokédex',
-              style: AppTextStyle.normalBlack.copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           Expanded(
             child: capturedPokemon.isEmpty
                 ? const Center(

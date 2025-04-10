@@ -50,7 +50,7 @@ class _LoadingAnimationState extends ConsumerState<LoadingScreen>
 
       if (mounted) {
         if (isUserLoggedIn) {
-          context.router.replace(const SearchRoute());
+          context.router.replace(const HomeRoute());
         } else {
           context.router.replace(const LoginRoute());
         }

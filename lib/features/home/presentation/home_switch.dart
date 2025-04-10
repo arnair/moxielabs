@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/constants/palette.dart';
 import 'package:flutter_pokedex/constants/textstyles.dart';
 
-class SearchSwitch extends StatelessWidget {
-  final bool showCaptured;
-  final void Function() toggleCaptured;
+class HomeSwitch extends StatelessWidget {
+  final bool showPokedex;
+  final void Function() togglePokedex;
   final double containerWidth = 360.0;
   final double containerHeight = 40.0;
 
-  const SearchSwitch({
+  const HomeSwitch({
     super.key,
-    required this.showCaptured,
-    required this.toggleCaptured,
+    required this.showPokedex,
+    required this.togglePokedex,
   });
 
   @override
@@ -36,7 +36,7 @@ class SearchSwitch extends StatelessWidget {
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              left: !showCaptured ? 0 : (containerWidth / 2),
+              left: !showPokedex ? 0 : (containerWidth / 2),
               child: Container(
                 margin: const EdgeInsets.only(top: 1),
                 decoration: BoxDecoration(
@@ -50,38 +50,40 @@ class SearchSwitch extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 3.0),
+                Expanded(
                   child: GestureDetector(
-                    onTap: toggleCaptured,
+                    onTap: togglePokedex,
                     child: Container(
                       height: containerHeight,
                       decoration: const BoxDecoration(
                         color: Colors.transparent,
                       ),
-                      child: Text(
-                        'Pokedex',
-                        style: !showCaptured
-                            ? AppTextStyle.titleBlack
-                            : AppTextStyle.titleWhite,
+                      child: Center(
+                        child: Text(
+                          'Search',
+                          style: !showPokedex
+                              ? AppTextStyle.titleBlack
+                              : AppTextStyle.titleWhite,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 3.0),
+                Expanded(
                   child: GestureDetector(
-                    onTap: toggleCaptured,
+                    onTap: togglePokedex,
                     child: Container(
                       height: containerHeight,
                       decoration: const BoxDecoration(
                         color: Colors.transparent,
                       ),
-                      child: Text(
-                        'Captured',
-                        style: showCaptured
-                            ? AppTextStyle.titleBlack
-                            : AppTextStyle.titleWhite,
+                      child: Center(
+                        child: Text(
+                          'Pokédex',
+                          style: showPokedex
+                              ? AppTextStyle.titleBlack
+                              : AppTextStyle.titleWhite,
+                        ),
                       ),
                     ),
                   ),
@@ -89,7 +91,7 @@ class SearchSwitch extends StatelessWidget {
               ],
             ),
             GestureDetector(
-              onTap: toggleCaptured,
+              onTap: togglePokedex,
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(),
